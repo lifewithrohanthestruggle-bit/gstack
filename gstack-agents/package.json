@@ -1,0 +1,19 @@
+{
+  "name": "gstack-agents",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GStack Agents — Open Source All-Grok Multi-Agent AI System (free-first MVP)",
+  "type": "module",
+  "scripts": {
+    "setup": "npm --prefix server install && npm --prefix web install",
+    "dev": "node scripts/dev.js",
+    "server": "npm --prefix server run dev",
+    "web": "npm --prefix web run dev",
+    "cli": "npm --prefix server run cli",
+    "demo": "npm --prefix server run demo",
+    "test": "npm --prefix server test",
+    "build": "npm --prefix web run build",
+    "start": "npm --prefix server start"
+  },
+  "license": "MIT"
+}
