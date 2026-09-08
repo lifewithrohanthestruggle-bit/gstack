@@ -1,0 +1,11 @@
+# runtime + local files
+node_modules/
+dist/
+data/
+*.log
+.DS_Store
+
+# secrets
+.env
+.env.local
+.env.*.local
