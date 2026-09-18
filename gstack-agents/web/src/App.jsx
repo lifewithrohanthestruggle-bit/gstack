@@ -78,6 +78,7 @@ function Icon({ name, size = 20, strokeWidth = 1.8 }) {
     check: <path d="m5 12 4 4L19 6" />,
     plus: <><path d="M12 5v14M5 12h14" /></>,
     send: <><path d="m21 3-7.5 18-3.5-7-7-3.5L21 3Z" /><path d="M10 14 21 3" /></>,
+    mic: <><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7" /></>,
     close: <><path d="m6 6 12 12M18 6 6 18" /></>,
     help: <><circle cx="12" cy="12" r="9" /><path d="M9.75 9a2.35 2.35 0 1 1 3.95 1.7c-.9.8-1.7 1.15-1.7 2.55" /><path d="M12 17h.01" strokeWidth="2.4" /></>,
     lock: <><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
@@ -366,18 +367,26 @@ function SafetyCheck() {
 
 function ChatView({ onBack }) {
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState([{ from: 'ai', text: "Hi Rohan, I'm here to make skin care feel a little simpler. What would you like to understand today?" }])
+  const [conversation, setConversation] = useState(false)
+  const [listening, setListening] = useState(false)
+  const [messages, setMessages] = useState([])
+  const topics = ['Acne', 'Dark spots', 'Redness', 'Reaction', 'Dryness', 'Something else']
 
   const sendMessage = (value = input) => {
     const clean = value.trim()
     if (!clean) return
-    setMessages((current) => [...current, { from: 'user', text: clean }, { from: 'ai', text: "That's a thoughtful question. I can help you explore it safely — a skin scan or a quick chat with a dermatologist can give you more context." }])
+    setConversation(true)
+    setMessages((current) => [...current, { from: 'user', text: clean }, { from: 'ai', text: 'Thanks for sharing that. I can help you understand what you are noticing and suggest a gentle next step.' }])
     setInput('')
   }
 
-  return <div className="page tool-page chat-page"><PageHeader eyebrow="AI companion" title="Ask away, Rohan." description="A calm space for your everyday skin questions." onBack={onBack} /><div className="chat-shell"><div className="chat-top"><div className="ai-avatar"><Icon name="sparkle" size={21} /></div><div><strong>Saathi</strong><span>Online · here to help</span></div><button className="icon-button"><Icon name="more" size={19} /></button></div><div className="chat-messages">{messages.map((message, index) => <div className={`message-row ${message.from}`} key={`${message.from}-${index}`}>{message.from === 'ai' && <span className="mini-ai"><Icon name="sparkle" size={12} /></span>}<div className="message-bubble">{message.text}</div></div>)}</div><div className="suggestion-row"><button onClick={() => sendMessage('How do I build a simple routine?')}>Simple routine</button><button onClick={() => sendMessage('Why does my skin feel dry?')}>Dry skin</button><button onClick={() => sendMessage('When should I see a doctor?')}>See a doctor</button></div><form className="chat-composer" onSubmit={(event) => { event.preventDefault(); sendMessage() }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about your skin…" aria-label="Ask about your skin" /><button type="submit" aria-label="Send message"><Icon name="send" size={18} /></button></form></div><p className="chat-disclaimer"><Icon name="shield" size={14} /> Saathi offers general guidance, not a medical diagnosis.</p></div>
-}
+  const speak = () => {
+    setListening(true)
+    window.setTimeout(() => setListening(false), 2200)
+  }
 
+  return <div className="page tool-page assistant-page"><div className="assistant-topbar"><button className="assistant-back" onClick={onBack}><Icon name="arrow" size={17} /><span>Back home</span></button><div className="assistant-wordmark"><strong>DERMASAATHI <b>AI</b></strong><span>SkinCare Assistant</span></div><span className="assistant-online"><i /> Online</span></div><div className={`assistant-shell ${conversation ? 'conversation-mode' : ''}`}>{!conversation ? <div className="assistant-welcome"><div className="assistant-sparkle"><Icon name="sparkle" size={22} /></div><h1>What is happening<br />with your skin?</h1><p>Choose a topic to help me understand what you&apos;re noticing.</p><div className="topic-grid">{topics.map((topic) => <button key={topic} onClick={() => sendMessage(topic)}>{topic}<Icon name="arrowUp" size={14} /></button>)}</div></div> : <div className="assistant-conversation"><div className="conversation-heading"><div className="assistant-sparkle small"><Icon name="sparkle" size={17} /></div><div><strong>Tell me what&apos;s going on.</strong><span>I&apos;m listening, Rohan.</span></div></div><div className="assistant-messages">{messages.map((message, index) => <div className={`assistant-message ${message.from}`} key={`${message.from}-${index}`}>{message.from === 'ai' && <span className="mini-ai"><Icon name="sparkle" size={11} /></span>}<div>{message.text}</div></div>)}</div></div>}<div className="assistant-divider" /><div className="assistant-compose-row"><button className={`assistant-speak ${listening ? 'listening' : ''}`} onClick={speak}><span><Icon name="mic" size={17} /></span><strong>{listening ? 'Listening…' : 'Speak'}</strong></button><form className="assistant-form" onSubmit={(event) => { event.preventDefault(); sendMessage() }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Type message..." aria-label="Type message" /><button type="submit" aria-label="Send message"><Icon name="send" size={17} /></button></form></div></div><p className="assistant-disclaimer"><Icon name="shield" size={13} /> Your conversations are private. AI guidance is not a medical diagnosis.</p></div>
+}
 function QueueView({ onBack }) {
   const [booked, setBooked] = useState(false)
   return <div className="page tool-page queue-page"><PageHeader eyebrow="Care queue" title="Talk to a doctor." description="Expert care is just a few taps away when you need it." onBack={onBack} /><div className="queue-banner"><span className="queue-banner-icon"><Icon name="doctor" size={24} /></span><div><strong>Not sure what your skin needs?</strong><p>A dermatologist can help you move forward with confidence.</p></div><Icon name="arrowUp" size={18} /></div><div className="queue-heading"><div><span className="section-kicker">Available for you</span><h3>Recommended specialists</h3></div><button className="filter-button"><Icon name="plus" size={14} /> Filters</button></div><div className="doctor-list">{doctors.map((doctor) => <article className="doctor-card" key={doctor.name}><div className={`doctor-avatar ${doctor.color}`}>{doctor.initials}</div><div className="doctor-main"><div className="doctor-title"><div><h3>{doctor.name}</h3><p>{doctor.specialty}</p></div><button className="icon-button subtle"><Icon name="more" size={17} /></button></div><span className="doctor-meta"><Icon name="check" size={13} /> {doctor.experience}</span><div className="doctor-footer"><span><Icon name="calendar" size={14} /> {doctor.next}</span><button className={`book-button ${booked ? 'booked' : ''}`} onClick={() => setBooked(true)}>{booked ? <><Icon name="check" size={14} /> Requested</> : 'Book a slot'}</button></div></div></article>)}</div><div className="queue-note"><Icon name="help" size={16} /><span>For urgent symptoms or sudden changes, please contact a local medical professional.</span></div></div>
