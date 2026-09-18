@@ -325,7 +325,9 @@ function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto, ac
 }
 
 function ScanProgress() {
-  return <div className="scan-progress"><div className="progress-header"><h3>Reading your skin</h3><span>In progress</span></div><div className="progress-track"><span /></div><div className="progress-steps"><span className="done"><Icon name="check" size={13} /> Lighting</span><span className="active"><i /> Texture</span><span>Moisture</span></div><p className="progress-note"><span className="loading-dots"><i /><i /><i /></span> No need to do anything — we&apos;re taking a careful look.</p></div>
+  const checks = ['Face quality', 'Visible redness', 'Texture', 'Pigmentation']
+
+  return <div className="scan-progress analysis-progress"><div className="analysis-heading"><span className="eyebrow"><Icon name="scan" size={13} /> AI screening</span><h3>Analyzing your images...</h3><p>We&apos;re looking at a few gentle signals in your skin.</p></div><div className="analysis-content"><div className="analysis-list">{checks.map((item) => <div className="analysis-row" key={item}><span>{item}</span><span className="analysis-check"><Icon name="check" size={13} /></span></div>)}</div><div className="analysis-score"><strong>68<span>%</span></strong><small>complete</small></div></div><div className="progress-track analysis-track"><span /></div><div className="analysis-footer"><Icon name="shield" size={15} /><span>AI screening <b>≠</b> medical diagnosis</span></div></div>
 }
 
 function ResultSummary({ onReset }) {
