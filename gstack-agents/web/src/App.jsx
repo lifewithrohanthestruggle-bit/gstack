@@ -295,7 +295,7 @@ function CaptureStep({ activeSide, capturedViews, onSelectSide, onCapture }) {
   )
 }
 
-function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto, activeSide, capturedViews, onSelectSide, onCapture, onSafetyCheck }) {
+function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto, activeSide, capturedViews, onSelectSide, onCapture, onSafetyContinue, onConversation }) {
   const statusCopy = status === 'scanning'
     ? { eyebrow: 'Analyzing gently', title: 'Looking a little closer…', detail: 'Keep still while we check your skin. This usually takes less than a minute.' }
     : status === 'complete'
@@ -316,7 +316,7 @@ function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto, ac
           <div className="scan-stage-copy"><span className="eyebrow"><Icon name={status === 'complete' ? 'sparkle' : 'scan'} size={13} /> {statusCopy.eyebrow}</span><h2>{status === 'ready' ? <>Let&apos;s understand<br />your skin.</> : statusCopy.title}</h2><p>{statusCopy.detail}</p></div>
         </div>
         <div className="scan-options">
-          {status === 'complete' ? <ResultSummary onReset={onReset} onSafetyCheck={onSafetyCheck} /> : status === 'safety' ? <SafetyCheck /> : status === 'scanning' ? <ScanProgress /> : status === 'capture' ? <CaptureStep activeSide={activeSide} capturedViews={capturedViews} onSelectSide={onSelectSide} onCapture={onCapture} /> : <>
+          {status === 'complete' ? <ResultSummary onReset={onReset} onConversation={onConversation} /> : status === 'safety' ? <SafetyCheck onContinue={onSafetyContinue} /> : status === 'scanning' ? <ScanProgress /> : status === 'capture' ? <CaptureStep activeSide={activeSide} capturedViews={capturedViews} onSelectSide={onSelectSide} onCapture={onCapture} /> : <>
             <div className="scan-option-heading"><h3>Choose how to scan</h3><span>Step 1 of 2</span></div>
             <button className="scan-option" onClick={onStart}><span className="option-icon option-camera"><Icon name="camera" size={21} /></span><span><strong>Use my camera</strong><small>Best for a live, guided scan</small></span><Icon name="chevron" size={17} /></button>
             <label className="scan-option" htmlFor="photo-upload"><span className="option-icon option-upload"><Icon name="upload" size={21} /></span><span><strong>Upload a photo</strong><small>{selectedPhoto ? selectedPhoto : 'Use a clear photo from your device'}</small></span><Icon name="chevron" size={17} /><input id="photo-upload" type="file" accept="image/*" onChange={onPhoto} /></label>
@@ -348,26 +348,20 @@ function ScreeningDots({ level }) {
   </span>
 }
 
-function ResultSummary({ onReset, onSafetyCheck }) {
-  return <div className="result-summary screening-result"><div className="screening-result-head"><div><span className="eyebrow"><Icon name="sparkle" size={13} /> Your skin screening</span><h3>YOUR SKIN SCREENING</h3><p>Here&apos;s what we noticed in your images.</p></div><span className="result-check"><Icon name="check" size={18} /></span></div><div className="screening-list">{screeningMetrics.map((metric) => <div className="screening-row" key={metric.label}><strong>{metric.label}</strong><div className="screening-reading"><ScreeningDots level={metric.level} /><span>{metric.note}</span></div></div>)}</div><div className="result-note screening-disclaimer"><Icon name="shield" size={16} /><p><strong>AI screening is not a medical diagnosis.</strong> The image shows features that can be associated with pigmentation. A photo alone cannot establish a diagnosis. A dermatologist can assess this further.</p></div><button className="primary-button screening-continue" onClick={onSafetyCheck}>Continue <Icon name="arrow" size={15} /></button><button className="secondary-button" onClick={onReset}>Run another scan <Icon name="arrow" size={15} /></button></div>
+function ResultSummary({ onReset, onConversation }) {
+  return <div className="result-summary screening-result"><div className="screening-result-head"><div><span className="eyebrow"><Icon name="sparkle" size={13} /> Your skin screening</span><h3>YOUR SKIN SCREENING</h3><p>Here&apos;s what we noticed in your images.</p></div><span className="result-check"><Icon name="check" size={18} /></span></div><div className="screening-list">{screeningMetrics.map((metric) => <div className="screening-row" key={metric.label}><strong>{metric.label}</strong><div className="screening-reading"><ScreeningDots level={metric.level} /><span>{metric.note}</span></div></div>)}</div><div className="result-note screening-disclaimer"><Icon name="shield" size={16} /><p><strong>AI screening is not a medical diagnosis.</strong> The image shows features that can be associated with pigmentation. A photo alone cannot establish a diagnosis. A dermatologist can assess this further.</p></div><button className="primary-button screening-continue" onClick={onConversation}>Continue <Icon name="arrow" size={15} /></button><button className="secondary-button" onClick={onReset}>Run another scan <Icon name="arrow" size={15} /></button></div>
 }
 
 const safetyQuestions = ['Severe swelling', 'Blisters', 'Eye involvement', 'Breathing difficulty', 'Rapidly worsening symptoms']
 
-function SafetyCheck() {
+function SafetyCheck({ onContinue }) {
   const [selected, setSelected] = useState([])
-  const [submitted, setSubmitted] = useState(false)
 
   const toggleQuestion = (question) => setSelected((current) => current.includes(question) ? current.filter((item) => item !== question) : [...current, question])
 
-  if (submitted) {
-    return <div className="safety-panel safety-confirmed"><span className="safety-confirm-icon"><Icon name="check" size={22} /></span><span className="eyebrow">Safety check saved</span><h3>Thank you for checking in.</h3><p>{selected.length > 0 ? 'Because you selected a warning sign, please contact a medical professional before trying anything new.' : 'No warning signs selected. We’ll keep your next steps gentle and simple.'}</p><button className="secondary-button" onClick={() => setSubmitted(false)}>Review answers <Icon name="arrow" size={15} /></button></div>
-  }
-
-  return <div className="safety-panel"><div className="safety-mode"><span className="safety-warning">⚠</span><span>SKIN REACTION MODE</span></div><h3>Your symptoms may need extra care.</h3><p>Before recommending anything,<br />let&apos;s check a few safety questions.</p><strong className="safety-question-label">Do you have:</strong><div className="safety-list">{safetyQuestions.map((question) => <label className={`safety-option ${selected.includes(question) ? 'selected' : ''}`} key={question}><input type="checkbox" checked={selected.includes(question)} onChange={() => toggleQuestion(question)} /><span className="safety-box"><Icon name="check" size={12} /></span><span>{question}</span></label>)}</div><button className="primary-button safety-continue" onClick={() => setSubmitted(true)}>Continue <Icon name="arrow" size={15} /></button><p className="safety-footnote"><Icon name="shield" size={14} /> If symptoms are severe or worsening, seek urgent medical care.</p></div>
+  return <div className="safety-panel"><div className="safety-mode"><span className="safety-warning">⚠</span><span>SKIN REACTION MODE</span></div><h3>Your symptoms may need extra care.</h3><p>Before recommending anything,<br />let&apos;s check a few safety questions.</p><strong className="safety-question-label">Do you have:</strong><div className="safety-list">{safetyQuestions.map((question) => <label className={`safety-option ${selected.includes(question) ? 'selected' : ''}`} key={question}><input type="checkbox" checked={selected.includes(question)} onChange={() => toggleQuestion(question)} /><span className="safety-box"><Icon name="check" size={12} /></span><span>{question}</span></label>)}</div><button className="primary-button safety-continue" onClick={() => onContinue(selected)}>Continue <Icon name="arrow" size={15} /></button><p className="safety-footnote"><Icon name="shield" size={14} /> If symptoms are severe or worsening, seek urgent medical care.</p></div>
 }
-
-function ChatView({ onBack }) {
+function ChatView({ onBack, onQueue }) {
   const [input, setInput] = useState('')
   const [conversation, setConversation] = useState(false)
   const [listening, setListening] = useState(false)
@@ -393,7 +387,7 @@ function ChatView({ onBack }) {
     window.setTimeout(() => setListening(false), 2200)
   }
 
-  return <div className="page tool-page assistant-page"><div className="assistant-topbar"><button className="assistant-back" onClick={onBack}><Icon name="arrow" size={17} /><span>Back home</span></button><div className="assistant-wordmark"><strong>DERMASAATHI <b>AI</b></strong><span>SkinCare Assistant</span></div><span className="assistant-online"><i /> Online</span></div><div className={`assistant-shell ${conversation ? 'conversation-mode' : ''}`}>{!conversation ? <div className="assistant-welcome"><div className="assistant-sparkle"><Icon name="sparkle" size={22} /></div><h1>What is happening<br />with your skin?</h1><p>Choose a topic to help me understand what you&apos;re noticing.</p><div className="topic-grid">{topics.map((topic) => <button key={topic} onClick={() => sendMessage(topic)}>{topic}<Icon name="arrowUp" size={14} /></button>)}</div></div> : <div className="assistant-conversation"><div className="conversation-heading"><div className="assistant-sparkle small"><Icon name="sparkle" size={17} /></div><div><strong>Tell me what&apos;s going on.</strong><span>I&apos;m listening, Rohan.</span></div></div><div className="assistant-messages">{messages.map((message, index) => <div className={`assistant-message ${message.from}`} key={`${message.from}-${index}`}>{message.from === 'ai' && <span className="mini-ai"><Icon name="sparkle" size={11} /></span>}<div>{message.text}</div></div>)}{typing && <div className="assistant-message"><span className="mini-ai"><Icon name="sparkle" size={11} /></span><div className="typing-indicator"><i /><i /><i /></div></div>}</div></div>}<div className="assistant-divider" /><div className="assistant-compose-row"><button className={`assistant-speak ${listening ? 'listening' : ''}`} onClick={speak}><span><Icon name="mic" size={17} /></span><strong>{listening ? 'Listening…' : 'Speak'}</strong></button><form className="assistant-form" onSubmit={(event) => { event.preventDefault(); sendMessage() }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Type message..." aria-label="Type message" /><button type="submit" aria-label="Send message"><Icon name="send" size={17} /></button></form></div></div><p className="assistant-disclaimer"><Icon name="shield" size={13} /> Your conversations are private. AI guidance is not a medical diagnosis.</p></div>
+  return <div className="page tool-page assistant-page"><div className="assistant-topbar"><button className="assistant-back" onClick={onBack}><Icon name="arrow" size={17} /><span>Back home</span></button><div className="assistant-wordmark"><strong>DERMASAATHI <b>AI</b></strong><span>SkinCare Assistant</span></div><span className="assistant-online"><i /> Online</span></div><div className={`assistant-shell ${conversation ? 'conversation-mode' : ''}`}>{!conversation ? <div className="assistant-welcome"><div className="assistant-sparkle"><Icon name="sparkle" size={22} /></div><h1>What is happening<br />with your skin?</h1><p>Choose a topic to help me understand what you&apos;re noticing.</p><div className="topic-grid">{topics.map((topic) => <button key={topic} onClick={() => sendMessage(topic)}>{topic}<Icon name="arrowUp" size={14} /></button>)}</div></div> : <div className="assistant-conversation"><div className="conversation-heading"><div className="assistant-sparkle small"><Icon name="sparkle" size={17} /></div><div><strong>Tell me what&apos;s going on.</strong><span>I&apos;m listening, Rohan.</span></div></div><div className="assistant-messages">{messages.map((message, index) => <div className={`assistant-message ${message.from}`} key={`${message.from}-${index}`}>{message.from === 'ai' && <span className="mini-ai"><Icon name="sparkle" size={11} /></span>}<div>{message.text}</div></div>)}{typing && <div className="assistant-message"><span className="mini-ai"><Icon name="sparkle" size={11} /></span><div className="typing-indicator"><i /><i /><i /></div></div>}</div><button className="assistant-queue-cta" onClick={onQueue}>Join the virtual queue <Icon name="arrow" size={15} /></button></div>}<div className="assistant-divider" /><div className="assistant-compose-row"><button className={`assistant-speak ${listening ? 'listening' : ''}`} onClick={speak}><span><Icon name="mic" size={17} /></span><strong>{listening ? 'Listening…' : 'Speak'}</strong></button><form className="assistant-form" onSubmit={(event) => { event.preventDefault(); sendMessage() }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Type message..." aria-label="Type message" /><button type="submit" aria-label="Send message"><Icon name="send" size={17} /></button></form></div></div><p className="assistant-disclaimer"><Icon name="shield" size={13} /> Your conversations are private. AI guidance is not a medical diagnosis.</p></div>
 }
 function QueueView({ onBack, onChat }) {
   const [chatStarted, setChatStarted] = useState(false)
@@ -453,7 +447,7 @@ export default function App() {
 
   useEffect(() => {
     if (scanStatus !== 'scanning') return undefined
-    const timer = window.setTimeout(() => setScanStatus('complete'), 3200)
+    const timer = window.setTimeout(() => setScanStatus('safety'), 3200)
     return () => window.clearTimeout(timer)
   }, [scanStatus])
 
@@ -495,8 +489,8 @@ export default function App() {
 
   let content
   if (activeView === 'home') content = <HomeView onNavigate={navigate} onNotify={notify} />
-  if (activeView === 'scan') content = <ScanView onBack={() => navigate('home')} status={scanStatus} onStart={beginCameraCapture} onReset={() => { setScanStatus('ready'); setCaptureSide('front'); setCapturedViews([]) }} onSafetyCheck={() => setScanStatus('safety')} selectedPhoto={selectedPhoto} onPhoto={handlePhoto} activeSide={captureSide} capturedViews={capturedViews} onSelectSide={setCaptureSide} onCapture={captureCurrentSide} />
-  if (activeView === 'chat') content = <ChatView onBack={() => navigate('home')} />
+  if (activeView === 'scan') content = <ScanView onBack={() => navigate('home')} status={scanStatus} onStart={beginCameraCapture} onReset={() => { setScanStatus('ready'); setCaptureSide('front'); setCapturedViews([]) }} onSafetyContinue={() => setScanStatus('complete')} onConversation={() => navigate('chat')} selectedPhoto={selectedPhoto} onPhoto={handlePhoto} activeSide={captureSide} capturedViews={capturedViews} onSelectSide={setCaptureSide} onCapture={captureCurrentSide} />
+  if (activeView === 'chat') content = <ChatView onBack={() => navigate('home')} onQueue={() => navigate('queue')} />
   if (activeView === 'queue') content = <QueueView onBack={() => navigate('home')} onChat={() => navigate('chat')} />
   if (activeView === 'routine') content = <RoutineView onBack={() => navigate('home')} />
   if (activeView === 'profile') content = <ProfileView onBack={() => navigate('home')} />

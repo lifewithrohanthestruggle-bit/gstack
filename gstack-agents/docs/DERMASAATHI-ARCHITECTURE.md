@@ -26,6 +26,30 @@ flowchart TD
     Q --> UI
 ```
 
+## Product user flow
+
+```mermaid
+flowchart TD
+    U[USER] --> P[PHOTO]
+    P --> S[AI SAFETY CHECK]
+    S --> SS[SKIN SCREENING]
+    SS --> C[AI CONVERSATION]
+    C --> Q[VIRTUAL QUEUE]
+    Q --> D[DERMATOLOGIST]
+    D --> T[DOCTOR-APPROVED PLAN]
+    T --> F[FOLLOW-UP]
+    F --> J[SKIN JOURNEY]
+```
+
+The client follows this order deliberately:
+
+1. Capture a multi-angle photo set.
+2. Run the safety questions before showing automated skin observations.
+3. Show the screening with clear uncertainty and medical disclaimers.
+4. Let the user ask questions in the AI conversation.
+5. Offer the virtual doctor queue instead of pretending the AI can replace a dermatologist.
+6. Keep the doctor-approved plan, follow-up, and skin journey as persistent care history.
+
 ## Responsibilities
 
 ### 1. Next.js application
