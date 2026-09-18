@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react'
 const navItems = [
   { id: 'home', label: 'Home', icon: 'home' },
   { id: 'scan', label: 'Scan', icon: 'scan' },
-  { id: 'queue', label: 'Queue', icon: 'queue' },
-  { id: 'chat', label: 'Chat', icon: 'chat' },
-  { id: 'profile', label: 'Me', icon: 'user' },
+  { id: 'queue', label: 'Queue', icon: 'clock' },
+  { id: 'chat', label: 'AI', icon: 'sparkle' },
+  { id: 'profile', label: 'Profile', icon: 'user' },
 ]
 
 const quickActions = [
