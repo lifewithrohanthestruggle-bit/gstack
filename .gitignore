@@ -1,5 +1,6 @@
 .env
 node_modules/
+.next/
 dist/
 browse/dist/
 design/dist/
