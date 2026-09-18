@@ -369,6 +369,7 @@ function ChatView({ onBack }) {
   const [input, setInput] = useState('')
   const [conversation, setConversation] = useState(false)
   const [listening, setListening] = useState(false)
+  const [typing, setTyping] = useState(false)
   const [messages, setMessages] = useState([])
   const topics = ['Acne', 'Dark spots', 'Redness', 'Reaction', 'Dryness', 'Something else']
 
@@ -376,8 +377,13 @@ function ChatView({ onBack }) {
     const clean = value.trim()
     if (!clean) return
     setConversation(true)
-    setMessages((current) => [...current, { from: 'user', text: clean }, { from: 'ai', text: 'Thanks for sharing that. I can help you understand what you are noticing and suggest a gentle next step.' }])
+    setMessages((current) => [...current, { from: 'user', text: clean }])
     setInput('')
+    setTyping(true)
+    window.setTimeout(() => {
+      setMessages((current) => [...current, { from: 'ai', text: 'Thanks for sharing that. I can help you understand what you are noticing and suggest a gentle next step.' }])
+      setTyping(false)
+    }, 650)
   }
 
   const speak = () => {
@@ -385,7 +391,7 @@ function ChatView({ onBack }) {
     window.setTimeout(() => setListening(false), 2200)
   }
 
-  return <div className="page tool-page assistant-page"><div className="assistant-topbar"><button className="assistant-back" onClick={onBack}><Icon name="arrow" size={17} /><span>Back home</span></button><div className="assistant-wordmark"><strong>DERMASAATHI <b>AI</b></strong><span>SkinCare Assistant</span></div><span className="assistant-online"><i /> Online</span></div><div className={`assistant-shell ${conversation ? 'conversation-mode' : ''}`}>{!conversation ? <div className="assistant-welcome"><div className="assistant-sparkle"><Icon name="sparkle" size={22} /></div><h1>What is happening<br />with your skin?</h1><p>Choose a topic to help me understand what you&apos;re noticing.</p><div className="topic-grid">{topics.map((topic) => <button key={topic} onClick={() => sendMessage(topic)}>{topic}<Icon name="arrowUp" size={14} /></button>)}</div></div> : <div className="assistant-conversation"><div className="conversation-heading"><div className="assistant-sparkle small"><Icon name="sparkle" size={17} /></div><div><strong>Tell me what&apos;s going on.</strong><span>I&apos;m listening, Rohan.</span></div></div><div className="assistant-messages">{messages.map((message, index) => <div className={`assistant-message ${message.from}`} key={`${message.from}-${index}`}>{message.from === 'ai' && <span className="mini-ai"><Icon name="sparkle" size={11} /></span>}<div>{message.text}</div></div>)}</div></div>}<div className="assistant-divider" /><div className="assistant-compose-row"><button className={`assistant-speak ${listening ? 'listening' : ''}`} onClick={speak}><span><Icon name="mic" size={17} /></span><strong>{listening ? 'Listening…' : 'Speak'}</strong></button><form className="assistant-form" onSubmit={(event) => { event.preventDefault(); sendMessage() }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Type message..." aria-label="Type message" /><button type="submit" aria-label="Send message"><Icon name="send" size={17} /></button></form></div></div><p className="assistant-disclaimer"><Icon name="shield" size={13} /> Your conversations are private. AI guidance is not a medical diagnosis.</p></div>
+  return <div className="page tool-page assistant-page"><div className="assistant-topbar"><button className="assistant-back" onClick={onBack}><Icon name="arrow" size={17} /><span>Back home</span></button><div className="assistant-wordmark"><strong>DERMASAATHI <b>AI</b></strong><span>SkinCare Assistant</span></div><span className="assistant-online"><i /> Online</span></div><div className={`assistant-shell ${conversation ? 'conversation-mode' : ''}`}>{!conversation ? <div className="assistant-welcome"><div className="assistant-sparkle"><Icon name="sparkle" size={22} /></div><h1>What is happening<br />with your skin?</h1><p>Choose a topic to help me understand what you&apos;re noticing.</p><div className="topic-grid">{topics.map((topic) => <button key={topic} onClick={() => sendMessage(topic)}>{topic}<Icon name="arrowUp" size={14} /></button>)}</div></div> : <div className="assistant-conversation"><div className="conversation-heading"><div className="assistant-sparkle small"><Icon name="sparkle" size={17} /></div><div><strong>Tell me what&apos;s going on.</strong><span>I&apos;m listening, Rohan.</span></div></div><div className="assistant-messages">{messages.map((message, index) => <div className={`assistant-message ${message.from}`} key={`${message.from}-${index}`}>{message.from === 'ai' && <span className="mini-ai"><Icon name="sparkle" size={11} /></span>}<div>{message.text}</div></div>)}{typing && <div className="assistant-message"><span className="mini-ai"><Icon name="sparkle" size={11} /></span><div className="typing-indicator"><i /><i /><i /></div></div>}</div></div>}<div className="assistant-divider" /><div className="assistant-compose-row"><button className={`assistant-speak ${listening ? 'listening' : ''}`} onClick={speak}><span><Icon name="mic" size={17} /></span><strong>{listening ? 'Listening…' : 'Speak'}</strong></button><form className="assistant-form" onSubmit={(event) => { event.preventDefault(); sendMessage() }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Type message..." aria-label="Type message" /><button type="submit" aria-label="Send message"><Icon name="send" size={17} /></button></form></div></div><p className="assistant-disclaimer"><Icon name="shield" size={13} /> Your conversations are private. AI guidance is not a medical diagnosis.</p></div>
 }
 function QueueView({ onBack, onChat }) {
   const [chatStarted, setChatStarted] = useState(false)
