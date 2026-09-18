@@ -330,8 +330,21 @@ function ScanProgress() {
   return <div className="scan-progress analysis-progress"><div className="analysis-heading"><span className="eyebrow"><Icon name="scan" size={13} /> AI screening</span><h3>Analyzing your images...</h3><p>We&apos;re looking at a few gentle signals in your skin.</p></div><div className="analysis-content"><div className="analysis-list">{checks.map((item) => <div className="analysis-row" key={item}><span>{item}</span><span className="analysis-check"><Icon name="check" size={13} /></span></div>)}</div><div className="analysis-score"><strong>68<span>%</span></strong><small>complete</small></div></div><div className="progress-track analysis-track"><span /></div><div className="analysis-footer"><Icon name="shield" size={15} /><span>AI screening <b>≠</b> medical diagnosis</span></div></div>
 }
 
+const screeningMetrics = [
+  { label: 'Pigmentation', level: 3, note: 'Visible signs' },
+  { label: 'Redness', level: 2, note: 'Mild appearance' },
+  { label: 'Texture', level: 3, note: 'Some unevenness' },
+  { label: 'Oiliness', level: 4, note: 'Appears elevated' },
+]
+
+function ScreeningDots({ level }) {
+  return <span className="screening-dots" aria-label={`${level} out of 5`}>
+    {Array.from({ length: 5 }, (_, index) => <i className={index < level ? 'filled' : ''} key={index} />)}
+  </span>
+}
+
 function ResultSummary({ onReset }) {
-  return <div className="result-summary"><div className="result-heading"><span className="result-check"><Icon name="check" size={18} /></span><div><h3>Baseline created</h3><p>18 September 2026 · Just now</p></div></div><div className="result-metrics"><div><strong>Balanced</strong><span>Overall feel</span></div><div><strong>Good</strong><span>Hydration</span></div><div><strong>Calm</strong><span>Appearance</span></div></div><div className="result-note"><Icon name="sparkle" size={16} /><p><strong>Your next best step:</strong> keep your routine simple and check in again in 7 days.</p></div><button className="secondary-button" onClick={onReset}>Run another scan <Icon name="arrow" size={15} /></button></div>
+  return <div className="result-summary screening-result"><div className="screening-result-head"><div><span className="eyebrow"><Icon name="sparkle" size={13} /> Your skin screening</span><h3>YOUR SKIN SCREENING</h3><p>Here&apos;s what we noticed in your images.</p></div><span className="result-check"><Icon name="check" size={18} /></span></div><div className="screening-list">{screeningMetrics.map((metric) => <div className="screening-row" key={metric.label}><strong>{metric.label}</strong><div className="screening-reading"><ScreeningDots level={metric.level} /><span>{metric.note}</span></div></div>)}</div><div className="result-note"><Icon name="shield" size={16} /><p><strong>AI screening is not a medical diagnosis.</strong> Use these observations as a starting point for your skin-care journey.</p></div><button className="secondary-button" onClick={onReset}>Run another scan <Icon name="arrow" size={15} /></button></div>
 }
 
 function ChatView({ onBack }) {

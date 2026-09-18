@@ -284,6 +284,20 @@ button { cursor: pointer; }
 @keyframes resultPop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .complete-illustration i { position: absolute; border-radius: 50%; border: 1px solid rgba(190, 229, 202, .27); }.complete-illustration i:nth-child(2) { width: 150px; height: 150px; }.complete-illustration i:nth-child(3) { width: 240px; height: 240px; }.complete-illustration i:nth-child(4) { width: 320px; height: 320px; }
 .result-summary { padding-top: 16px; }
+.screening-result-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.screening-result-head h3 { margin: 10px 0 4px; color: var(--ink); font-family: var(--display); font-size: 19px; letter-spacing: -.055em; }
+.screening-result-head p { margin: 0; color: #9aa8a1; font-size: 10px; }
+.screening-result-head .result-check { margin-top: 3px; }
+.screening-list { display: grid; gap: 0; margin: 23px 0 17px; border-top: 1px solid var(--line); }
+.screening-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.screening-row > strong { color: var(--ink-soft); font-size: 12px; font-weight: 700; }
+.screening-reading { display: flex; align-items: center; gap: 9px; }
+.screening-reading > span:last-child { color: #8d9c94; font-size: 10px; text-align: right; }
+.screening-dots { display: inline-flex; align-items: center; gap: 3px; }
+.screening-dots i { width: 7px; height: 7px; display: block; border: 1px solid #cbd8d0; border-radius: 50%; background: transparent; }
+.screening-dots i.filled { border-color: var(--forest); background: var(--forest); }
+.screening-result .result-note { margin-top: 18px; }
+.screening-result .result-note svg { color: var(--forest); }
 .result-heading { display: flex; align-items: center; gap: 10px; }
 .result-check { width: 35px; height: 35px; display: grid; place-items: center; color: var(--forest); background: var(--mint); border-radius: 11px; }
 .result-heading h3 { margin: 0; color: var(--ink); font-family: var(--display); font-size: 16px; letter-spacing: -.03em; }
