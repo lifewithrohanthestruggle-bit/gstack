@@ -269,12 +269,37 @@ function HomeView({ onNavigate, onNotify }) {
   )
 }
 
-function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto }) {
+function CaptureStep({ activeSide, capturedViews, onSelectSide, onCapture }) {
+  const sides = ['front', 'left', 'right']
+  const sideLabels = { front: 'Front', left: 'Left', right: 'Right' }
+  const currentIndex = sides.indexOf(activeSide)
+  const isCurrentCaptured = capturedViews.includes(activeSide)
+
+  return (
+    <div className="capture-panel">
+      <div className="capture-heading"><h3>Capture your skin</h3><span>{capturedViews.length} of 3 photos</span></div>
+      <div className="capture-viewport">
+        <span className="camera-corner camera-corner-tl" /><span className="camera-corner camera-corner-tr" />
+        <span className="camera-corner camera-corner-bl" /><span className="camera-corner camera-corner-br" />
+        <div className="capture-face"><span className="capture-hair" /><span className="capture-eye capture-eye-left" /><span className="capture-eye capture-eye-right" /><span className="capture-nose" /><span className="capture-mouth" /></div>
+        <span className="capture-focus"><Icon name="scan" size={17} /></span>
+      </div>
+      <ul className="capture-checklist"><li><span><Icon name="check" size={12} /></span>Remove glasses</li><li><span><Icon name="check" size={12} /></span>Natural lighting</li><li><span><Icon name="check" size={12} /></span>No beauty filter</li></ul>
+      <button className="capture-button" onClick={onCapture} disabled={isCurrentCaptured}><Icon name="camera" size={17} /> {isCurrentCaptured ? `${sideLabels[activeSide]} captured` : 'Capture'}</button>
+      <div className="capture-sides" aria-label="Choose capture angle">{sides.map((side, index) => <button key={side} className={`${activeSide === side ? 'active' : ''} ${capturedViews.includes(side) ? 'captured' : ''}`} onClick={() => onSelectSide(side)}><span>{capturedViews.includes(side) ? <Icon name="check" size={11} /> : index + 1}</span>{sideLabels[side]}</button>)}</div>
+      <p className="capture-helper">{isCurrentCaptured ? (currentIndex < sides.length - 1 ? `Turn slightly to your ${sides[currentIndex + 1]} side.` : 'All angles are ready. We will start your scan next.') : 'Keep your face inside the frame and look straight ahead.'}</p>
+    </div>
+  )
+}
+
+function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto, activeSide, capturedViews, onSelectSide, onCapture }) {
   const statusCopy = status === 'scanning'
     ? { eyebrow: 'Analyzing gently', title: 'Looking a little closer…', detail: 'Keep still while we check your skin. This usually takes less than a minute.' }
     : status === 'complete'
       ? { eyebrow: 'Your scan is ready', title: 'A helpful first look.', detail: 'We found a few patterns to help you build a more mindful routine.' }
-      : { eyebrow: 'AI skin scan', title: "Let's check in with your skin.", detail: 'A well-lit, makeup-free photo helps us give you the most useful guidance.' }
+      : status === 'capture'
+        ? { eyebrow: 'Camera capture', title: 'Ready when you are.', detail: 'We will capture three quick angles so your skin gets the attention it deserves.' }
+        : { eyebrow: 'AI skin scan', title: "Let's check in with your skin.", detail: 'A well-lit, makeup-free photo helps us give you the most useful guidance.' }
 
   return (
     <div className="page tool-page scan-page">
@@ -286,7 +311,7 @@ function ScanView({ onBack, status, onStart, onReset, selectedPhoto, onPhoto }) 
           <div className="scan-stage-copy"><span className="eyebrow"><Icon name={status === 'complete' ? 'sparkle' : 'scan'} size={13} /> {statusCopy.eyebrow}</span><h2>{status === 'ready' ? <>Let&apos;s understand<br />your skin.</> : statusCopy.title}</h2><p>{statusCopy.detail}</p></div>
         </div>
         <div className="scan-options">
-          {status === 'complete' ? <ResultSummary onReset={onReset} /> : status === 'scanning' ? <ScanProgress /> : <>
+          {status === 'complete' ? <ResultSummary onReset={onReset} /> : status === 'scanning' ? <ScanProgress /> : status === 'capture' ? <CaptureStep activeSide={activeSide} capturedViews={capturedViews} onSelectSide={onSelectSide} onCapture={onCapture} /> : <>
             <div className="scan-option-heading"><h3>Choose how to scan</h3><span>Step 1 of 2</span></div>
             <button className="scan-option" onClick={onStart}><span className="option-icon option-camera"><Icon name="camera" size={21} /></span><span><strong>Use my camera</strong><small>Best for a live, guided scan</small></span><Icon name="chevron" size={17} /></button>
             <label className="scan-option" htmlFor="photo-upload"><span className="option-icon option-upload"><Icon name="upload" size={21} /></span><span><strong>Upload a photo</strong><small>{selectedPhoto ? selectedPhoto : 'Use a clear photo from your device'}</small></span><Icon name="chevron" size={17} /><input id="photo-upload" type="file" accept="image/*" onChange={onPhoto} /></label>
@@ -351,6 +376,8 @@ function Toast({ message, onClose }) {
 export default function App() {
   const [activeView, setActiveView] = useState('home')
   const [scanStatus, setScanStatus] = useState('ready')
+  const [captureSide, setCaptureSide] = useState('front')
+  const [capturedViews, setCapturedViews] = useState([])
   const [selectedPhoto, setSelectedPhoto] = useState('')
   const [toast, setToast] = useState('')
 
@@ -368,8 +395,29 @@ export default function App() {
 
   const navigate = (view) => {
     setActiveView(view)
-    if (view !== 'scan') setScanStatus('ready')
+    if (view === 'scan') {
+      setScanStatus('ready')
+      setCaptureSide('front')
+      setCapturedViews([])
+    } else {
+      setScanStatus('ready')
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const beginCameraCapture = () => {
+    setCaptureSide('front')
+    setCapturedViews([])
+    setScanStatus('capture')
+  }
+
+  const captureCurrentSide = () => {
+    const sides = ['front', 'left', 'right']
+    const nextViews = capturedViews.includes(captureSide) ? capturedViews : [...capturedViews, captureSide]
+    setCapturedViews(nextViews)
+    const nextSide = sides[sides.indexOf(captureSide) + 1]
+    if (nextSide) setCaptureSide(nextSide)
+    else setScanStatus('scanning')
   }
 
   const notify = () => setToast('You’re all caught up. We’ll gently remind you when it’s time for your next check-in.')
@@ -383,7 +431,7 @@ export default function App() {
 
   let content
   if (activeView === 'home') content = <HomeView onNavigate={navigate} onNotify={notify} />
-  if (activeView === 'scan') content = <ScanView onBack={() => navigate('home')} status={scanStatus} onStart={() => setScanStatus('scanning')} onReset={() => setScanStatus('ready')} selectedPhoto={selectedPhoto} onPhoto={handlePhoto} />
+  if (activeView === 'scan') content = <ScanView onBack={() => navigate('home')} status={scanStatus} onStart={beginCameraCapture} onReset={() => { setScanStatus('ready'); setCaptureSide('front'); setCapturedViews([]) }} selectedPhoto={selectedPhoto} onPhoto={handlePhoto} activeSide={captureSide} capturedViews={capturedViews} onSelectSide={setCaptureSide} onCapture={captureCurrentSide} />
   if (activeView === 'chat') content = <ChatView onBack={() => navigate('home')} />
   if (activeView === 'queue') content = <QueueView onBack={() => navigate('home')} />
   if (activeView === 'routine') content = <RoutineView onBack={() => navigate('home')} />
